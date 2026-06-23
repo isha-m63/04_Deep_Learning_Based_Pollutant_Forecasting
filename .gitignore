@@ -1,0 +1,17 @@
+#Python cache
+__pycache__/
+*.pyc
+
+#Pytest
+.pytest_cache/
+
+#Jupyter
+.ipynb_checkpoints/
+
+#VSCode settings
+.vscode/
+
+#Generated data files
+data/*
+evaluation/*.png
+evaluation/*.csv

@@ -1,0 +1,55 @@
+data: 
+  raw: 'C:/02_AtmPhy_ML/S4_AQ_PINN/data/raw/AirQualityUCI.csv'
+  processed: 'C:/02_AtmPhy_ML/S4_AQ_PINN/data/processed/'
+    
+training:
+  batch_size: 32
+  epochs: 50
+  learning_rate: 0.001
+  
+
+weight_paths:
+  lstm_model: 'C:/02_AtmPhy_ML/S4_AQ_PINN/weights/trained_lstm_model.pth'
+  neural_ode_model: 'C:/02_AtmPhy_ML/S4_AQ_PINN/weights/trained_neural_ode_model.pth'
+  pinn_model: 'C:/02_AtmPhy_ML/S4_AQ_PINN/weights/trained_pinn_model.pth'
+
+
+evaluation:
+  loss_epoch_path:
+    lstm_losses: 'C:/02_AtmPhy_ML/S4_AQ_PINN/evaluation/lstm/'
+    neural_ode_losses: 'C:/02_AtmPhy_ML/S4_AQ_PINN/evaluation/neural_ode/'
+    pinn_losses: 'C:/02_AtmPhy_ML/S4_AQ_PINN/evaluation/pinn/'
+
+  metrics_path:
+    lstm_metrics: 'C:/02_AtmPhy_ML/S4_AQ_PINN/evaluation/lstm/'
+    neural_ode_metrics: 'C:/02_AtmPhy_ML/S4_AQ_PINN/evaluation/neural_ode/'
+    pinn_metrics: 'C:/02_AtmPhy_ML/S4_AQ_PINN/evaluation/pinn/'
+
+  predictions_path:
+    lstm_predictions: 'C:/02_AtmPhy_ML/S4_AQ_PINN/evaluation/lstm/'
+    neural_ode_predictions: 'C:/02_AtmPhy_ML/S4_AQ_PINN/evaluation/neural_ode/'
+    pinn_predictions: 'C:/02_AtmPhy_ML/S4_AQ_PINN/evaluation/pinn/'
+
+
+model: 
+  lstm:
+    input_size: 6
+    output_size: 3
+    hidden_size: 64
+    num_layers: 2
+    dropout: 0.2
+
+  neural_ode:
+    input_size: 6
+    hidden_size: 64
+    intermediate_size: 64
+    output_size: 3
+
+  pinn: 
+    input_size: 6
+    output_size: 3
+    hidden_size: 64
+    num_layers: 2
+    dropout: 0.2
+
+    
