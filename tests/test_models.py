@@ -4,9 +4,7 @@ import pandas as pd
 import pytest
 import torch
 
-from models.lstm import LSTMRegressor
-from models.neural_ode import NeuralODERegressor
-from models.pinn import PINNRegressor
+from models.registry import REGISTRY, get_spec, load_model
 from training.train_lstm import train_lstm
 from training.train_neural_ode import train_neural_ode
 from training.train_pinn import train_pinn
@@ -33,10 +31,11 @@ def r2(y, p):
     return 1 - ((y - p) ** 2).sum(0) / ((y - y.mean(0)) ** 2).sum(0)
 
 
-def load(cls, key, *args):
-    m = cls(*args)
-    m.load_state_dict(torch.load(CFG["weight_paths"][key], map_location="cpu", weights_only=True))
-    return m.eval()
+def predict_with(key, windows, path=None):
+    spec = get_spec(key)
+    model = load_model(spec, CFG, path or CFG["weight_paths"][spec.weights_key], "cpu")
+    with torch.no_grad():
+        return spec.forward(model, windows).numpy()
 
 
 def test_normalization_file_matches_data():
@@ -45,28 +44,23 @@ def test_normalization_file_matches_data():
         assert saved[k] == pytest.approx(fresh[k])
 
 
-def test_lstm_reproduces_saved_metrics(test_split):
+@pytest.mark.parametrize("key", list(REGISTRY))
+def test_nowcast_models_reproduce_saved_metrics(test_split, key):
     x, y = test_split
-    with torch.no_grad():
-        p = load(LSTMRegressor, "lstm_model", 6, 64, 2, 3, 0.2)(x).numpy()
-    saved = pd.read_csv("evaluation/lstm/lstm_metrics.csv")["R2"].to_numpy()
-    assert r2(y, p) == pytest.approx(saved, abs=0.01)
+    saved = pd.read_csv(f"evaluation/{key}/{key}_metrics.csv")["R2"].to_numpy()
+    assert r2(y, predict_with(key, x)) == pytest.approx(saved, abs=0.01)
 
 
-def test_neural_ode_reproduces_saved_metrics(test_split):
-    x, y = test_split
-    with torch.no_grad():
-        p = load(NeuralODERegressor, "neural_ode_model", 6, 64, 64, 3)(x[:, -1], torch.linspace(0, 1, 10)).numpy()
-    saved = pd.read_csv("evaluation/neural_ode/neural_ode_metrics.csv")["R2"].to_numpy()
-    assert r2(y, p) == pytest.approx(saved, abs=0.01)
+def test_registry_models_all_run_on_a_window():
+    x = torch.zeros(4, SEQ, 6)
+    for key in REGISTRY:
+        spec = get_spec(key)
+        assert spec.forward(spec.build(CFG["model"][key]), x).shape == (4, 3)
 
 
-def test_pinn_reproduces_saved_metrics(test_split):
-    x, y = test_split
-    with torch.no_grad():
-        p = load(PINNRegressor, "pinn_model", 6, 64, 3, 2)(x[:, -1]).numpy()
-    saved = pd.read_csv("evaluation/pinn/pinn_metrics.csv")["R2"].to_numpy()
-    assert r2(y, p) == pytest.approx(saved, abs=0.01)
+def test_unknown_model_is_rejected():
+    with pytest.raises(KeyError):
+        get_spec("transformer")
 
 
 @pytest.fixture(scope="module")
@@ -83,3 +77,30 @@ def test_training_entry_points_run(tiny_loader):
     train_lstm(tiny_loader, tiny_loader, 6, 3, dev, hidden_size=8, num_layers=1, dropout=0.0, epochs=1)
     train_neural_ode(tiny_loader, tiny_loader, 6, 3, dev, hidden_size=8, intermediate_size=8, epochs=1)
     train_pinn(tiny_loader, tiny_loader, 6, 3, 1, dev, hidden_size=8, epochs=1)
+
+
+def test_forecast_horizon_alignment(tmp_path):
+    """The target of window i at horizon h is the row h hours after the nowcast target."""
+    df = pd.read_csv("demo_assets/cleaned_data.csv").iloc[:50]
+    df[FEATURES].to_csv(tmp_path / "X.csv", index=False)
+    df[TARGETS].to_csv(tmp_path / "y.csv", index=False)
+    now = AirQualityDataset(tmp_path / "X.csv", tmp_path / "y.csv")
+    ahead = AirQualityDataset(tmp_path / "X.csv", tmp_path / "y.csv", horizon=3)
+    assert len(ahead) == len(now) - 3
+    assert torch.equal(ahead[0][0], now[0][0]) and torch.equal(ahead[0][1], now[3][1])
+    with pytest.raises(ValueError):
+        AirQualityDataset(tmp_path / "X.csv", tmp_path / "y.csv", horizon=-1)
+
+
+@pytest.mark.parametrize("h", [24, 48, 72])
+@pytest.mark.parametrize("key", list(REGISTRY))
+def test_forecast_models_reproduce_saved_metrics(test_split, h, key):
+    import os
+    sfx = f"_h{h}"
+    path = CFG["weight_paths"][get_spec(key).weights_key].replace(".pth", sfx + ".pth")
+    metrics_csv = f"evaluation/{key}/{key}_metrics{sfx}.csv"
+    if not (os.path.exists(path) and os.path.exists(metrics_csv)):
+        pytest.skip("forecast model not trained")
+    x, y = test_split
+    p = predict_with(key, x[: len(x) - h], path)
+    assert r2(y[h:], p) == pytest.approx(pd.read_csv(metrics_csv)["R2"].to_numpy(), abs=0.01)

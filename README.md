@@ -51,6 +51,7 @@ reference **CO, NOx and NO₂** concentrations.
 ├── demo_assets                    cleaned_data.csv bundled for the demo (data/ is git-ignored)
 ├── docs                           Project documentation
 ├── evaluation
+│   ├── common.py                  shared evaluation (metrics, predictions, CSV output)
 │   ├── lstm/                      eval_lstm.py, metrics, predictions, loss curve, plots
 │   ├── neural_ode/                eval_neural_ode.py and its outputs
 │   └── pinn/                      eval_pinn.py, metrics, predictions, loss curve
@@ -58,13 +59,14 @@ reference **CO, NOx and NO₂** concentrations.
 │   ├── lstm.py                    LSTMRegressor
 │   ├── neural_ode.py              ODEFunc, NeuralODERegressor
 │   ├── pinn.py                    PINNRegressor
-│   └── bayesian_neural_ode.py, probabilistic_lstm.py   (empty placeholders)
+│   └── registry.py                ModelSpec registry: how each model is built and fed (single extension point)
 ├── notebooks
 │   ├── data_cleaning_eda.ipynb    Cleaning + EDA -> cleaned_data.csv
 │   ├── preprocessing.ipynb        90/10 split, z-score normalisation
 │   └── model_training_{lstm,neural_ode,pinn}.ipynb
 ├── training
-│   └── train_{lstm,neural_ode,pinn}.py    (+ empty Bayesian/probabilistic placeholders)
+│   ├── trainer.py                 shared training loop + CLI
+│   └── train_{lstm,neural_ode,pinn}.py    thin wrappers around trainer.fit
 ├── tests                          pytest: weights load, saved metrics reproduce, training runs
 ├── utils                          data_loader.py, config.py, normalization.py
 ├── weights                        Trained state dicts + normalization.json
@@ -84,7 +86,7 @@ See [docs/setup.md](docs/setup.md) for training and evaluation.
 ## Live demo (Streamlit, Docker)
 
 `streamlit_app.py` serves the three trained models (LSTM, Neural ODE, PINN) with model comparison,
-a time-series explorer and a what-if sandbox. Weights are read from `weights/`, the cleaned dataset from `demo_assets/`.
+a time-series explorer with calendar days and day-over-day changes, and a what-if sandbox. Pick `Nowcast` or `Day 1/2/3 ahead` (+24/48/72 h) in the sidebar; rising concentrations are shown in red and falling ones in green. Weights are read from `weights/`, the cleaned dataset from `demo_assets/`.
 
 ```bash
 docker build -t aq-demo .

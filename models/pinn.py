@@ -1,10 +1,9 @@
 import torch
 import torch.nn as nn
-from torch.autograd import grad
 
-#Model the simplified temporal evolution of pollutant concentrations C(t) of NOx, NO2 and CO  influenced by 
-#meteorological variables (temperature, relative humidity and absolute humidity) through an ODE-like relation:
-#dC/dt = R(C, meteo) where R is a reaction rate function approximated by the fully connected ANN, embedding physical constraints in the loss.
+# A tanh MLP mapping (sensor signals + meteorology) at one time step to CO, NOx and NO2.
+# "Physics-informed" here means a soft temporal-smoothness constraint added to the data loss during training
+# (see training/train_pinn.py); it is NOT a diffusion-advection PDE: the data comes from a single location.
 
 
 class PINNRegressor(nn.Module):
@@ -25,18 +24,3 @@ class PINNRegressor(nn.Module):
     def forward(self, x):
         # x shape: (batch_size, features)
         return self.net(x)
-
-    def physics_loss(self, inputs, outputs, t):
-        # inputs include concentrations + meteorological variables
-        # outputs = model(inputs) = predicted concentrations at time t
-
-        # Compute d(outputs)/dt via autograd
-        outputs_t = grad(outputs, t, 
-                         grad_outputs=torch.ones_like(outputs),
-                         create_graph=True, retain_graph=True)[0]
-
-        # Define physics residual as derivative minus model output (reaction rates)
-        # PINN enforces dC/dt = R(C, meteo) modeled by NN output
-        residual = outputs_t - outputs
-        
-        return torch.mean(residual**2)

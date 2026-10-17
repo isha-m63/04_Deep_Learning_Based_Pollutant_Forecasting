@@ -13,12 +13,6 @@
 - The README structure was rewritten to match the repository.
 
 ## Still open
-- `models/bayesian_neural_ode.py`, `models/probabilistic_lstm.py`, `training/train_bayesian_neural_ode.py` and
-  `training/train_probabilistic_lstm.py` are empty placeholders.
-- The notebooks still point at `C:/02_AtmPhy_ML/S4_AQ_PINN/config.yaml`; change the path to `configs/config.yaml`.
-- `notebooks/model_training_pinn.ipynb` has stale output (a 2-output network and LSTM metrics). Re-run it.
-- `evaluation/lstm/pinn_loss_epoch.csv` sits in the LSTM folder and differs from `evaluation/pinn/pinn_loss_epoch.csv`;
-  it is unclear which run it belongs to.
 - Saved metrics are in normalised units; compare with the original-unit table in [models.md](models.md).
 - Single split and single run, with no repeated seeds or confidence intervals.
 - `data/` is git-ignored except `demo_assets/`, so raw and processed data are not in version control.
@@ -26,5 +20,7 @@
 ## Modelling limitations (design, not bugs)
 - **The PINN's physics term is a smoothness penalty**, not the diffusion–advection PDE described in the project goal.
   There is no spatial component, since the data comes from a single location. `models/pinn.py: physics_loss` is unused.
-- **These are nowcasts, not forecasts.** Targets at hour *t* are predicted from inputs at hour *t* (and *t−1*, *t−2* for
-  the LSTM).
+- **The shipped base models are nowcasts.** Targets at hour *t* are predicted from inputs at hour *t* (and *t−1*, *t−2* for
+  the LSTM). Day-ahead models (+24/48/72 h) are trained with `--horizon` and are weak: from the last three hours of
+  low-cost-sensor readings alone, skill falls to R² ≈ 0.1–0.4 at one day and lower beyond (table in [models.md](models.md)).
+  No lagged targets, hour-of-day or weather forecasts are used as inputs.

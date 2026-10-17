@@ -68,3 +68,28 @@ Reading the table:
   values (their MAE and RMSE are in normalised units). PINN metrics are now saved in `evaluation/pinn/pinn_metrics.csv`.
 - These are one run on one chronological split of a single year, so small differences between models are not
   meaningful.
+
+## Day-ahead forecasts
+
+The same three architectures were retrained with the target shifted by 24, 48 and 72 hours (`--horizon`), using only the
+last three hours of sensor and weather readings as input (no lagged targets, no hour-of-day, no weather forecast).
+R² on the held-out test period (z-score and original units give the same R²):
+
+| Lead time | Model | CO | NOx | NO₂ |
+|---|---|---|---|---|
+| Nowcast | LSTM | 0.80 | 0.87 | 0.80 |
+| Nowcast | Neural ODE | 0.84 | 0.84 | 0.78 |
+| Nowcast | PINN | 0.72 | 0.75 | 0.75 |
+| Day 1 (+24 h) | LSTM | 0.30 | 0.27 | 0.42 |
+| Day 1 (+24 h) | Neural ODE | 0.33 | 0.29 | 0.40 |
+| Day 1 (+24 h) | PINN | 0.32 | 0.24 | 0.39 |
+| Day 2 (+48 h) | LSTM | 0.17 | 0.12 | 0.30 |
+| Day 2 (+48 h) | Neural ODE | 0.14 | 0.12 | 0.27 |
+| Day 2 (+48 h) | PINN | 0.14 | 0.07 | 0.23 |
+| Day 3 (+72 h) | LSTM | 0.14 | 0.09 | 0.24 |
+| Day 3 (+72 h) | Neural ODE | 0.06 | 0.11 | 0.30 |
+| Day 3 (+72 h) | PINN | 0.11 | 0.01 | 0.23 |
+
+Skill falls quickly with lead time: the sensors describe the current state of the air, and tomorrow's pollution also depends
+on weather and emissions that these inputs do not contain. Treat the day-ahead models as a baseline, not as an
+operational forecast. Regenerate the table with `python scripts/forecast_table.py`.

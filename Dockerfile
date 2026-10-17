@@ -11,6 +11,7 @@ COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
 COPY streamlit_app.py .
+COPY configs/ ./configs/
 COPY models/ ./models/
 COPY utils/ ./utils/
 COPY weights/ ./weights/

@@ -37,6 +37,9 @@ python -m utils.normalization            # weights/normalization.json (z-score s
 python -m training.train_lstm            # -> weights/trained_lstm_model.pth, evaluation/lstm/lstm_loss_epoch.csv
 python -m training.train_neural_ode
 python -m training.train_pinn
+python -m training.train_lstm --horizon 24      # day-ahead forecast; also 48 and 72 (any model)
+python -m evaluation.lstm.eval_lstm --horizon 24
+python scripts/forecast_table.py         # R² per model and lead time as a Markdown table
 python -m evaluation.lstm.eval_lstm      # metrics + predictions (z-score units)
 python -m evaluation.neural_ode.eval_neural_ode
 python -m evaluation.pinn.eval_pinn
