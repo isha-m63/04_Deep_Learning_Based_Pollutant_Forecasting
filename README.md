@@ -37,3 +37,24 @@ Develop a **physics-based framework** that integrates physical laws governing po
     │ └── config.yaml                 # Hyperparameters and file paths
     │
     └── README.md                     # Detailed project overview, objectives, installation, usage
+
+
+## Live demo (Streamlit, Docker)
+
+`streamlit_app.py` serves the three trained models (LSTM, Neural ODE, PINN) with model comparison,
+a time-series explorer and a what-if sandbox. Weights and the cleaned dataset are bundled in `demo_assets/`.
+
+```bash
+docker build -t aq-demo .
+docker run -p 7860:7860 aq-demo       # http://localhost:7860
+```
+
+Deploy to a Hugging Face Docker Space:
+
+```bash
+export HF_TOKEN=hf_xxx
+python scripts/deploy_space.py <username>/air-quality-pinn
+```
+
+> Note: the models estimate reference-analyzer concentrations from the co-located low-cost sensor
+> readings and meteorology of the same hour (soft-sensor / nowcast), not multi-step-ahead forecasts.
