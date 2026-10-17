@@ -37,6 +37,8 @@ def get_data_loaders(config, batch_size=32):
 
 
 if __name__ == '__main__':
+    from utils.config import load_config
+    config = load_config()
     train_loader, test_loader = get_data_loaders(config)
     for batch_idx, (features, targets) in enumerate(train_loader):
         print(f"Batch {batch_idx}: features shape {features.shape}, targets shape {targets.shape}")

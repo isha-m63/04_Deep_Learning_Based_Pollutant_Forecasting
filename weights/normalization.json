@@ -1,0 +1,42 @@
+{
+  "features": [
+    "sensor_co",
+    "sensor_nox",
+    "sensor_no2",
+    "temperature",
+    "relative_humidity",
+    "absolute_humidity"
+  ],
+  "targets": [
+    "co_ground_truth",
+    "nox_ground_truth",
+    "no2_ground_truth"
+  ],
+  "train_fraction": 0.9,
+  "x_mean": {
+    "sensor_co": 1102.0062937893363,
+    "sensor_nox": 842.554387839924,
+    "sensor_no2": 1483.931421446384,
+    "temperature": 18.84611685073032,
+    "relative_humidity": 49.10583066144164,
+    "absolute_humidity": 1.0510129616435102
+  },
+  "x_std": {
+    "sensor_co": 220.17529774826326,
+    "sensor_nox": 256.8853658106588,
+    "sensor_no2": 335.9109533180706,
+    "temperature": 8.784364764015823,
+    "relative_humidity": 17.22544531032046,
+    "absolute_humidity": 0.4013603291560052
+  },
+  "y_mean": {
+    "co_ground_truth": 2.1534022087638047,
+    "nox_ground_truth": 236.6770573566085,
+    "no2_ground_truth": 106.88873055456597
+  },
+  "y_std": {
+    "co_ground_truth": 1.4400329894359023,
+    "nox_ground_truth": 206.04598329085178,
+    "no2_ground_truth": 45.67404221996603
+  }
+}

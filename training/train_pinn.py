@@ -103,3 +103,21 @@ def train_pinn(train_loader, test_loader, input_size, output_size, num_layers,
         })
         df_losses.to_csv(os.path.join(losses_save_path, 'pinn_loss_epoch.csv'), index=False)
         print(f"Train/validation losses saved to {os.path.join(losses_save_path, 'pinn_loss_epoch.csv')}")
+
+
+if __name__ == '__main__':
+    from utils.config import load_config
+    from utils.data_loader import get_data_loaders
+
+    device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+    config = load_config()
+    m = config['model']['pinn']
+    t = config['training']
+
+    train_loader, test_loader = get_data_loaders(config, batch_size=t['batch_size'])
+
+    train_pinn(train_loader, test_loader, m['input_size'], m['output_size'], m['num_layers'], device,
+               hidden_size=m['hidden_size'], epochs=t['epochs'], lr=t['learning_rate'],
+               save_path=config['weight_paths']['pinn_model'],
+               losses_save_path=config['evaluation']['loss_epoch_path']['pinn_losses'],
+               lambda_phys=t['pinn_lambda_phys'], delta_t=t['pinn_delta_t'])

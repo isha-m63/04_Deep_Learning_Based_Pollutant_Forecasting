@@ -39,21 +39,21 @@ reference **CO, NOx and NO₂** concentrations.
 | [docs/architecture.md](docs/architecture.md) | Data flow, repo layout, module responsibilities |
 | [docs/setup.md](docs/setup.md) | Installation, data, config, training and evaluation |
 | [docs/models.md](docs/models.md) | Data and preprocessing, model details, training, full results |
-| [docs/deployment.md](docs/deployment.md) | Streamlit demo, Docker, Hugging Face Space |
+| [docs/deployment.md](docs/deployment.md) | Streamlit demo, Docker, Streamlit Community Cloud |
 | [docs/known-issues.md](docs/known-issues.md) | Gaps and bugs found, so you know what not to rely on |
 
 ## Project structure
 ```
-├── config.yaml                    Hyperparameters and file paths (currently absolute Windows paths)
+├── configs/config.yaml            Hyperparameters and file paths (relative to the repo root)
 ├── data
 │   ├── raw/AirQualityUCI.csv      Original dataset
 │   └── processed                  cleaned_data.csv, normalised train/test CSVs, plots
-├── demo_assets                    Cleaned data + trained weights bundled for the demo
+├── demo_assets                    cleaned_data.csv bundled for the demo (data/ is git-ignored)
 ├── docs                           Project documentation
 ├── evaluation
 │   ├── lstm/                      eval_lstm.py, metrics, predictions, loss curve, plots
 │   ├── neural_ode/                eval_neural_ode.py and its outputs
-│   └── pinn/                      eval_pinn.py (empty), loss curve
+│   └── pinn/                      eval_pinn.py, metrics, predictions, loss curve
 ├── models
 │   ├── lstm.py                    LSTMRegressor
 │   ├── neural_ode.py              ODEFunc, NeuralODERegressor
@@ -63,19 +63,19 @@ reference **CO, NOx and NO₂** concentrations.
 │   ├── data_cleaning_eda.ipynb    Cleaning + EDA -> cleaned_data.csv
 │   ├── preprocessing.ipynb        90/10 split, z-score normalisation
 │   └── model_training_{lstm,neural_ode,pinn}.ipynb
-├── scripts/deploy_space.py        Upload the demo to a Hugging Face Space
 ├── training
 │   └── train_{lstm,neural_ode,pinn}.py    (+ empty Bayesian/probabilistic placeholders)
-├── utils/data_loader.py           Windowed dataset and data loaders
-├── weights                        Trained state dicts
+├── tests                          pytest: weights load, saved metrics reproduce, training runs
+├── utils                          data_loader.py, config.py, normalization.py
+├── weights                        Trained state dicts + normalization.json
 ├── streamlit_app.py               Interactive demo
-├── Dockerfile, requirements-demo.txt
+├── Dockerfile, requirements.txt, requirements-dev.txt
 ```
 
 ## Quick start
 
 ```bash
-pip install streamlit torch torchdiffeq pandas numpy matplotlib   # or see requirements-demo.txt
+pip install -r requirements.txt
 streamlit run streamlit_app.py
 ```
 
@@ -84,19 +84,16 @@ See [docs/setup.md](docs/setup.md) for training and evaluation.
 ## Live demo (Streamlit, Docker)
 
 `streamlit_app.py` serves the three trained models (LSTM, Neural ODE, PINN) with model comparison,
-a time-series explorer and a what-if sandbox. Weights and the cleaned dataset are bundled in `demo_assets/`.
+a time-series explorer and a what-if sandbox. Weights are read from `weights/`, the cleaned dataset from `demo_assets/`.
 
 ```bash
 docker build -t aq-demo .
 docker run -p 7860:7860 aq-demo       # http://localhost:7860
 ```
 
-Deploy to a Hugging Face Docker Space:
+**Streamlit Community Cloud:** new app from this repo, branch `main`, file `streamlit_app.py`, Python 3.11.
 
-```bash
-export HF_TOKEN=hf_xxx
-python scripts/deploy_space.py <username>/air-quality-pinn
-```
+Run the tests with `pip install -r requirements-dev.txt && pytest`.
 
 ## References
 - S. De Vito et al., *On field calibration of an electronic nose for benzene estimation in an urban pollution monitoring

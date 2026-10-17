@@ -1,7 +1,9 @@
+# Runtime dependencies (Streamlit demo + inference). The CPU-only PyTorch build keeps images and
+# Streamlit Community Cloud installs small; on macOS/Windows pip simply uses the regular wheels.
 --extra-index-url https://download.pytorch.org/whl/cpu
-torch==2.5.1+cpu
-streamlit==1.40.2
-numpy==2.2.6
-pandas==2.3.3
-matplotlib==3.10.9
-torchdiffeq==0.2.5
+torch>=2.2
+torchdiffeq>=0.2.3
+streamlit>=1.40
+numpy>=1.26
+pandas>=2.2
+matplotlib>=3.8

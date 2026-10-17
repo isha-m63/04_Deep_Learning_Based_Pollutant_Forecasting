@@ -88,24 +88,17 @@ def train_lstm(train_loader, test_loader, input_size, output_size,
 
 
 if __name__ == '__main__':
-    import yaml
-    import os
-    from data.load_data import get_data_loaders
+    from utils.config import load_config
 
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+    config = load_config()
+    m = config['model']['lstm']
+    t = config['training']
 
-    with open(os.path.join('configs', 'config.yaml'), 'r') as f:
-        config = yaml.safe_load(f)
+    train_loader, test_loader = get_data_loaders(config, batch_size=t['batch_size'])
 
-    save_path = config['weight_paths']['lstm_model']
-    losses_save_path = config['evaluation']['loss_epoch_path']['lstm_losses']
-    input_size = config['model']['lstm']['input_size']
-    output_size = config['model']['lstm']['output_size']
-    batch_size = config['training']['batch_size']
-    learning_rate = config['training']['learning_rate']
-    epochs = config['training']['epochs']
-
-    train_loader, test_loader = get_data_loaders(config, batch_size=batch_size)
-
-    train_lstm(train_loader, test_loader, input_size, output_size, device,
-               epochs=epochs, lr=learning_rate, save_path=save_path, losses_save_path=losses_save_path)
+    train_lstm(train_loader, test_loader, m['input_size'], m['output_size'], device,
+               hidden_size=m['hidden_size'], num_layers=m['num_layers'], dropout=m['dropout'],
+               epochs=t['epochs'], lr=t['learning_rate'],
+               save_path=config['weight_paths']['lstm_model'],
+               losses_save_path=config['evaluation']['loss_epoch_path']['lstm_losses'])

@@ -1,0 +1,57 @@
+# Paths are relative to the repository root: run scripts from there (python -m training.train_lstm).
+data:
+  raw: 'data/raw/AirQualityUCI.csv'
+  processed: 'data/processed/'
+
+training:
+  batch_size: 32
+  epochs: 50
+  learning_rate: 0.001
+  pinn_lambda_phys: 1.0
+  pinn_delta_t: 1.0
+
+
+weight_paths:
+  lstm_model: 'weights/trained_lstm_model.pth'
+  neural_ode_model: 'weights/trained_neural_ode_model.pth'
+  pinn_model: 'weights/trained_pinn_model.pth'
+  normalization: 'weights/normalization.json'
+
+
+evaluation:
+  loss_epoch_path:
+    lstm_losses: 'evaluation/lstm/'
+    neural_ode_losses: 'evaluation/neural_ode/'
+    pinn_losses: 'evaluation/pinn/'
+
+  metrics_path:
+    lstm_metrics: 'evaluation/lstm/'
+    neural_ode_metrics: 'evaluation/neural_ode/'
+    pinn_metrics: 'evaluation/pinn/'
+
+  predictions_path:
+    lstm_predictions: 'evaluation/lstm/'
+    neural_ode_predictions: 'evaluation/neural_ode/'
+    pinn_predictions: 'evaluation/pinn/'
+
+
+model:
+  lstm:
+    input_size: 6
+    output_size: 3
+    hidden_size: 64
+    num_layers: 2
+    dropout: 0.2
+
+  neural_ode:
+    input_size: 6
+    hidden_size: 64
+    intermediate_size: 64
+    output_size: 3
+
+  pinn:
+    input_size: 6
+    output_size: 3
+    hidden_size: 64
+    num_layers: 2
+    dropout: 0.2

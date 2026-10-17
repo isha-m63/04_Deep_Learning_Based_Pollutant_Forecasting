@@ -130,3 +130,9 @@ def forecast_future(config, model_path, device, forecast_steps=6):
     print(f"Forecasted {forecast_steps} steps saved to {results_path}")
 
     return df_forecast'''
+
+
+if __name__ == "__main__":
+    from utils.config import load_config
+    config = load_config()
+    evaluate_model(config['weight_paths']['lstm_model'], config, torch.device('cpu'))

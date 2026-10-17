@@ -89,3 +89,9 @@ def evaluate_model(model_path, config, device):
 
 
     return metrics_df, df_results
+
+
+if __name__ == "__main__":
+    from utils.config import load_config
+    config = load_config()
+    evaluate_model(config['weight_paths']['neural_ode_model'], config, torch.device('cpu'))

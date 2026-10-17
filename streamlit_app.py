@@ -20,8 +20,11 @@ import matplotlib.pyplot as plt
 from models.lstm import LSTMRegressor
 from models.neural_ode import NeuralODERegressor
 from models.pinn import PINNRegressor
+from utils.normalization import load_stats
 
-ASSETS = Path(__file__).parent / "demo_assets"
+ROOT = Path(__file__).parent
+ASSETS = ROOT / "demo_assets"      # sample data
+WEIGHTS = ROOT / "weights"         # trained weights + normalisation statistics
 FEATURES = ["sensor_co", "sensor_nox", "sensor_no2", "temperature", "relative_humidity", "absolute_humidity"]
 TARGETS = ["co_ground_truth", "nox_ground_truth", "no2_ground_truth"]
 LABELS = {"co_ground_truth": "CO (mg/m³)", "nox_ground_truth": "NOx (ppb)", "no2_ground_truth": "NO₂ (µg/m³)"}
@@ -36,13 +39,14 @@ torch.set_num_threads(1)
 def load_everything():
     df = pd.read_csv(ASSETS / "cleaned_data.csv")
     n_train = int(0.9 * len(df))
-    # same z-score statistics as notebooks/preprocessing.ipynb (pandas std, ddof=1)
-    x_mu, x_sd = df[FEATURES][:n_train].mean(), df[FEATURES][:n_train].std()
-    y_mu, y_sd = df[TARGETS][:n_train].mean(), df[TARGETS][:n_train].std()
+    # z-score statistics saved by `python -m utils.normalization` (same as notebooks/preprocessing.ipynb)
+    stats = load_stats(WEIGHTS / "normalization.json")
+    x_mu, x_sd = pd.Series(stats["x_mean"])[FEATURES], pd.Series(stats["x_std"])[FEATURES]
+    y_mu, y_sd = pd.Series(stats["y_mean"])[TARGETS], pd.Series(stats["y_std"])[TARGETS]
 
     def mk(cls, fname, *a):
         m = cls(*a)
-        m.load_state_dict(torch.load(ASSETS / fname, map_location="cpu", weights_only=True))
+        m.load_state_dict(torch.load(WEIGHTS / fname, map_location="cpu", weights_only=True))
         return m.eval()
 
     nets = {

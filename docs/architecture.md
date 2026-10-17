@@ -19,7 +19,7 @@ evaluation/eval_*.py  ->  *_metrics.csv, *_predictions.csv, plots
 ```
 
 `streamlit_app.py` repeats the normalisation from `cleaned_data.csv` (train-split mean and std, `ddof=1`) and loads the
-weights from `demo_assets/`.
+weights from `weights/`.
 
 ## Modules
 
@@ -33,7 +33,7 @@ weights from `demo_assets/`.
 | `training/train_neural_ode.py` | Same loop; uses the last hour of each window and `t = linspace(0, 1, 10)` |
 | `training/train_pinn.py` | MSE data loss + `lambda_phys · mean(((f(x_t) − f(x_{t−1})) / Δt)²)` |
 | `evaluation/*/eval_*.py` | Compute MAE, RMSE, R² per pollutant, save predictions and plots (LSTM and Neural ODE only) |
-| `config.yaml` | Hyperparameters, weight, loss, metric and prediction paths |
+| `configs/config.yaml` | Hyperparameters, weight, loss, metric and prediction paths |
 
 ## Design decisions
 

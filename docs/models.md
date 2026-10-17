@@ -65,6 +65,6 @@ Reading the table:
 - The PINN is weakest on every target. The smoothness penalty does not help here, and a single-hour MLP has less
   context than the LSTM's 3-hour window.
 - The saved `evaluation/lstm/lstm_metrics.csv` and `evaluation/neural_ode/neural_ode_metrics.csv` give the same R²
-  values (their MAE and RMSE are in normalised units). No PINN metrics file was saved.
+  values (their MAE and RMSE are in normalised units). PINN metrics are now saved in `evaluation/pinn/pinn_metrics.csv`.
 - These are one run on one chronological split of a single year, so small differences between models are not
   meaningful.

@@ -2,8 +2,7 @@
 
 ## Streamlit demo
 
-`streamlit_app.py` loads `demo_assets/cleaned_data.csv` and the three weight files, rebuilds the normalisation from the
-first 90% of the data, and predicts on the held-out 10%. Tabs:
+`streamlit_app.py` loads `demo_assets/cleaned_data.csv`, the three weight files and `weights/normalization.json`, and predicts on the held-out 10%. Tabs:
 
 - **Model comparison.** Metrics table (MAE, RMSE, R² per model and pollutant) and true-vs-predicted scatter plots.
 - **Time-series explorer.** Reference analyzer vs. model predictions over a chosen window of the test period.
@@ -19,21 +18,18 @@ docker build -t aq-demo .
 docker run -p 7860:7860 aq-demo       # http://localhost:7860
 ```
 
-`python:3.11-slim`, CPU-only `torch==2.5.1` from the PyTorch CPU index (keeps the image small), then
-`requirements-demo.txt`. Only `streamlit_app.py`, `models/` and `demo_assets/` are copied. It runs as a non-root user
-(uid 1000, as Hugging Face Spaces requires) on port 7860.
+`python:3.11-slim`, CPU-only PyTorch (the `--extra-index-url` line in `requirements.txt` keeps the image small).
+Only `streamlit_app.py`, `models/`, `utils/`, `weights/` and `demo_assets/` are copied. It runs as a non-root user
+on port 7860.
 
-## Hugging Face Space
+## Streamlit Community Cloud
 
-```bash
-export HF_TOKEN=hf_xxx                # token with write access
-python scripts/deploy_space.py <username>/air-quality-pinn
-```
-
-`scripts/deploy_space.py` creates a Docker Space and uploads only what the image needs.
+New app from this repository: branch `main`, main file `streamlit_app.py`, Python 3.11. It installs `requirements.txt`
+(including the CPU PyTorch index) and needs no training step.
 
 ## Updating the demo after retraining
 
-Copy the new `.pth` files from `weights/` into `demo_assets/`. The architecture arguments in `load_everything()`
+The app reads `weights/` directly, so retraining updates it automatically (re-run `python -m utils.normalization` if
+the data changed). The architecture arguments in `load_everything()`
 (`LSTMRegressor(6, 64, 2, 3, 0.2)`, `NeuralODERegressor(6, 64, 64, 3)`, `PINNRegressor(6, 64, 3, 2)`) must match what
 you trained.
